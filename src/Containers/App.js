@@ -1,55 +1,65 @@
-import React, {Component} from "react";
+import React, {useState, useEffect} from "react";
 import Cardlist from "../Components/CardList";
 import SearchBox from "../Components/SearchBox";
 import Scroll from '../Components/Scroll';
 
 
-class App extends Component {
+function App() {
+    // If component did not use hooks but only class extend React Component
+    // constructor//(){
+    //     super();
+    //     this.state = {
+    //         robots : [],
+    //         searchField : ''
+    //     }
+    // //}
+    const [robots, setRobots] = useState([])
+    const [searchField, setSearchField] = useState('')
 
-    constructor(){
-        super();
-        this.state = {
-            robots : [],
-            searchField : ''
-        }
-    }
-
-
-    componentDidMount(){
-        fetch('https://jsonplaceholder.typicode.com/users')
-        .then(response=>{
-            return response.json();
-        })
-        .then(users=>{
-           this.setState({robots:users })
-        })
+    // If component did not use hooks but only class extend React Component
+    // componentDidMount(){
+    //     fetch('https://jsonplaceholder.typicode.com/users')
+    //     .then(response=>{
+    //         return response.json();
+    //     })
+    //     .then(users=>{
+    //        this.setState({robots:users })
+    //     })
         
+    // }
+
+    useEffect(()=>{
+        fetch('https://jsonplaceholder.typicode.com/users')
+        .then(res=>res.json())
+        .then(users=>{
+            setRobots(users);
+        })
+    },[])
+
+
+   const onSearchChange = (event) => {
+        //If component did not use hooks but only class extend React Component
+        // this.setState//({searchField: event.target.value});
+        setSearchField(event.target.value);
     }
 
 
-    onSearchChange = (event) => {
-        this.setState({searchField: event.target.value});
-    }
-
- render(){
-
-    const filteredRobots = this.state.robots.filter(robots =>{
-        return  robots.name.toLowerCase().includes(this.state.searchField.toLowerCase());
+    const filteredRobots = robots.filter(robot =>{
+        return robot.name.toLowerCase().includes(searchField.toLowerCase());
     })
-
-        return !this.state.robots.length ? 
+    console.log(robots,searchField);
+        return !robots.length ? 
                     <h1>loading...</h1> 
             :
             (
                 <div className="tc">
                     <h1>RoboFriends</h1>
-                    <SearchBox searchChange = {this.onSearchChange}/>
+                    <SearchBox searchChange = {onSearchChange}/>
                     <Scroll>
                         <Cardlist robots = {filteredRobots} />
                     </Scroll>
                 </div>
             );
     }
-}
 
 export default App;
