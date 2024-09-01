@@ -1,54 +1,53 @@
-import React, {useState, useEffect} from "react";
+import React, {Component} from "react";
+import { connect } from "react-redux";
 import Cardlist from "../Components/CardList";
 import SearchBox from "../Components/SearchBox";
 import Scroll from '../Components/Scroll';
+import { setSearchField,requestRobots } from "../actions";
 
+const mapStateToprops = state =>{
 
-function App() {
-    // If component did not use hooks but only class extend React Component
-    // constructor//(){
-    //     super();
-    //     this.state = {
-    //         robots : [],
-    //         searchField : ''
-    //     }
-    // //}
-    const [robots, setRobots] = useState([])
-    const [searchField, setSearchField] = useState('')
+    return {
+        searchField : state.searchRobots.searchField,
+        robots : state. requestRobots.robots,
+        isPending : state.requestRobots.isPending,
+        error: state.requestRobots.error
+    }
+}
 
-    // If component did not use hooks but only class extend React Component
-    // componentDidMount(){
-    //     fetch('https://jsonplaceholder.typicode.com/users')
-    //     .then(response=>{
-    //         return response.json();
-    //     })
-    //     .then(users=>{
-    //        this.setState({robots:users })
-    //     })
-        
-    // }
+//dispatch => action (Here we sending actions)
+const  mapDispatchToProps = (dispatch) =>{
+    //We can name the action as at we want to, but we keep the same name as we had before the redux (onSearchChange)
+   return {
+    onSearchChange : (event)=>dispatch(setSearchField(event.target.value)),
+    onRequestRobots : ()=> dispatch(requestRobots())
+   } 
+}
 
-    useEffect(()=>{
-        fetch('https://jsonplaceholder.typicode.com/users')
-        .then(res=>res.json())
-        .then(users=>{
-            setRobots(users);
-        })
-    },[])
-
-
-   const onSearchChange = (event) => {
-        //If component did not use hooks but only class extend React Component
-        // this.setState//({searchField: event.target.value});
-        setSearchField(event.target.value);
+class App extends Component {
+    
+    componentDidMount(){
+       this.props.onRequestRobots();
     }
 
+//We don not need it anymore, we replace it with the dispatchToProps
+//    onSearchChange = (event) => {
+//         //If component did not use hooks but only class extend React Component
+//         this.setState({searchField: event.target.value});
+//         //setSearchField(event.target.value);
+//     }
 
-    const filteredRobots = robots.filter(robot =>{
-        return robot.name.toLowerCase().includes(searchField.toLowerCase());
-    })
-    console.log(robots,searchField);
-        return !robots.length ? 
+
+    render(){
+
+        const {searchField, onSearchChange , robots, isPending} = this.props;
+
+       const filteredRobots = robots.filter(robot =>{
+            return robot.name.toLowerCase().includes(searchField.toLowerCase());
+        })
+
+
+        return isPending? 
                     <h1>loading...</h1> 
             :
             (
@@ -59,7 +58,11 @@ function App() {
                         <Cardlist robots = {filteredRobots} />
                     </Scroll>
                 </div>
-            );
+            )
+    }
     }
 
-export default App;
+export default connect(mapStateToprops, mapDispatchToProps)(App);
+
+//mapStateToProps = What state should the app listen to
+//mapDispatchToProps = What action should the app listen to
